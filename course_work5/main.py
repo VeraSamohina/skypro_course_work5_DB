@@ -14,7 +14,7 @@ def main():
     vacancies = get_vacancies(data_vacancy)
 
     # Создаем экземпляр класса DBManager, подключаемся к БД, создаем таблицу
-    dbmanager = DBManager(**params)
+    dbmanager = DBManager('vacancy_db', **params)
 
     # Заполняем таблицу данными
     dbmanager.insert_data(vacancies)

@@ -5,21 +5,29 @@ class DBManager:
     """
     Класс для работы с базой данных
     """
-    def __init__(self, user: str, password: str, host: str, port: str, dbname: str = 'postgres',
-                 table_name: str = 'vacancy_info'):
-        """
-        :param user, password, host, port, dbname: параметры для подключения к БД
-        :param table_name: имя создаваемой таблицы при создании экземпляра класса
-        """
-        self.conn = psycopg2.connect(dbname=dbname, user=user, password=password, host=host, port=port)
-        self.cur = self.conn.cursor()
-        self.table_name = table_name
-        self.create_table()
+    def __init__(self, database_name: str, **params: dict):
 
-    def create_table(self) -> None:
+        self.conn = psycopg2.connect(dbname='postgres', **params)
+        self.conn.autocommit = True
+        self.cur = self.conn.cursor()
+
+        try:
+            self.cur.execute(f'DROP DATABASE {database_name}')
+            self.conn.commit()
+
+        finally:
+            self.cur.execute(f'CREATE DATABASE {database_name}')
+        print("База данных успешно создана")
+        self.conn.close()
+        self.conn = psycopg2.connect(dbname=database_name, **params)
+        self.cur = self.conn.cursor()
+        self.create_table('vacancy_hh')
+
+    def create_table(self, table_name) -> None:
         """
         Создает таблицу в БД
         """
+        self.table_name = table_name
         with self.conn:
             self.cur.execute(f"""
             CREATE TABLE IF NOT EXISTS {self.table_name} (
